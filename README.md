@@ -1,0 +1,1 @@
+# FreeImage_full_static_CmkInstall
