@@ -2,7 +2,19 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(FreeImage   LANGUAGES CXX   VERSION 0.1.1   )
 
-set(CMAKE_DEBUG_POSTFIX  "d")
+
+
+# 改变安装路径可以使用下面的语句，Unix: "/usr/local", Windows: "c:/Program Files/${PROJECT_NAME}" 为默认值，所有的DESTINATION均以此目录为根目录
+# set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/mymath)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/../${PROJECT_NAME}_${CMAKE_CXX_COMPILER_VERSION}_install)
+
+
+
+#set(CMAKE_DEBUG_POSTFIX  "d")
+#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+if(MSVC)
+    set(CMAKE_DEBUG_POSTFIX "d")
+endif()
 
 
 #set(FI_SRCS_FILE fipMakefile.srcs)
@@ -105,13 +117,13 @@ target_include_directories(FreeImage PRIVATE ${INCLUDE})
 
 #-------------------install  destation ---------------------------
 #set( DESTINATION  "../install/")
-set(CMAKE_INSTALL_PREFIX "../install_FreeImage_VC14/")
+#set(CMAKE_INSTALL_PREFIX "../install_FreeImage_VC14/")
 #          And to the end of the top-level CMakeLists.txt we add:
 #install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 #install(FILES "${PROJECT_BINARY_DIR}/TutorialConfig.h"  DESTINATION include  )
 
 
-if (1)
+if ( 0 )
     #
     # Format the project using the `clang-format` target (i.e: cmake --build build --target clang-format)
     #
@@ -266,6 +278,43 @@ endif ()
 
 
 
+#//-------------------------------------------------------------------------
 
+target_include_directories(FreeImage PRIVATE  ${CMAKE_SOURCE_DIR}/Source )
+set_target_properties(FreeImage PROPERTIES PUBLIC_HEADER ${CMAKE_SOURCE_DIR}/Source/FreeImage.h)
+
+
+
+#//---MyMath---------------------------------------------
+# 写入库的版本信息
+# install
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    FreeImageConfigVersion.cmake
+    VERSION ${PACKAGE_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+# 将库文件，可执行文件，头文件安装到指定目录
+install(TARGETS FreeImage
+    EXPORT FreeImageTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    PUBLIC_HEADER DESTINATION include
+)
+
+# 将库的相关信息输出为MyMathConfig.cmake，供find_package查找
+install(EXPORT FreeImageTargets
+    FILE FreeImageTargets.cmake
+    NAMESPACE FreeImage::
+    DESTINATION lib/cmake/FreeImage
+)
+
+configure_file( FreeImageConfig.cmake.in  FreeImage/FreeImageConfig.cmake @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/FreeImage/FreeImageConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/FreeImageConfigVersion.cmake"
+    DESTINATION lib/cmake/FreeImage
+)
 
 
